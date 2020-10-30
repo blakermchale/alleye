@@ -1,0 +1,23 @@
+{
+	"folders": [
+		{
+			"name": "Blocks",
+			"path": "."
+		},
+		{
+			"name": "UE4",
+			"path": "/home/bmchale/git/external/UnrealEngine"
+		}
+	],
+	"settings": {
+		"typescript.tsc.autoDetect": "off"
+	},
+	"extensions": {
+		"recommendations": [
+			"ms-vscode.cpptools",
+			"ms-vscode.csharp",
+			"vadimcn.vscode-lldb",
+			"ms-vscode.mono-debug"
+		]
+	}
+}
