@@ -1,0 +1,20 @@
+<launch>
+    <!-- Remap PID topics to include namespace of drone -->
+    <remap from="/airsim_node/gimbal_angle_euler_cmd" to="/airsim_node/drone_1/gimbal_angle_euler_cmd"/>
+    <remap from="/airsim_node/gimbal_angle_quat_cmd" to="/airsim_node/drone_1/gimbal_angle_quat_cmd"/>
+    <remap from="/airsim_node/home_geo_point" to="/airsim_node/drone_1/home_geo_point"/>
+    <remap from="/airsim_node/odom_local_ned" to="/airsim_node/drone_1/odom_local_ned"/>
+    <remap from="/airsim_node/origin_geo_point" to="/airsim_node/drone_1/origin_geo_point"/>
+    <remap from="/vel_cmd_world_frame" to="/airsim_node/drone_1/vel_cmd_world_frame"/>
+
+    <include file="$(find airsim_ros_pkgs)/launch/airsim_with_simple_PD_position_controller.launch">
+    </include>
+    <include file="$(find alleye)/launch/continuous_detection.launch">
+        <arg name="node_namespace" value="apriltag_ros_continuous_node" />
+        <arg name="camera_name" value="/airsim_node/drone_1/bottom_center_custom/Scene" />
+        <arg name="camera_frame" value="camera" />
+        <arg name="image_topic" value="" />
+    </include>
+    <node name="drone" pkg="alleye" type="start_drone.py" output="screen">
+    </node>
+</launch>
