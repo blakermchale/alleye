@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from airsim_ros_pkgs.srv import Takeoff, Land, SetLocalPosition
+from apriltag_ros.msg import AprilTagDetectionArray
 import rospy
 
 class Drone:
@@ -12,6 +13,7 @@ class Drone:
         self.srv_takeoff = rospy.ServiceProxy(self.namespace + '/takeoff', Takeoff)
         self.srv_land = rospy.ServiceProxy(self.namespace + '/land', Land)
         self.srv_local_goal = rospy.ServiceProxy('/airsim_node/local_position_goal/override', SetLocalPosition)
+        self.subTag = rospy.Subscriber("/tag_detections", AprilTagDetectionArray, self.tagCallback)
 
     def start(self):
         # Initialize and takeoff drone
@@ -43,6 +45,9 @@ class Drone:
             return resp.success 
         except rospy.ServiceException as e:
             print("Service call failed: %s"%e)
+
+    def tagCallback(self, data):
+        pass
 
 
 def main():
