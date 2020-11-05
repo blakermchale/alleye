@@ -3,7 +3,7 @@
   <arg name="node_namespace" default="apriltag_ros_continuous_node" />
   <arg name="camera_name" default="/airsim_node/drone_1/bottom_center_custom/Scene" />
   <arg name="camera_frame" default="camera" />
-  <arg name="image_topic" default="" />
+  <arg name="image_topic" default="image_rect" />
 
   <!-- Set parameters -->
   <rosparam command="load" file="$(find alleye)/config/settings.yaml" ns="$(arg node_namespace)" />
@@ -11,7 +11,7 @@
   
   <node pkg="apriltag_ros" type="apriltag_ros_continuous_node" name="$(arg node_namespace)" clear_params="true" output="screen" launch-prefix="$(arg launch_prefix)" >
     <!-- Remap topics from those used in code to those on the ROS network -->
-    <remap from="image_rect" to="$(arg camera_name)$(arg image_topic)" />
+    <remap from="image_rect" to="$(arg camera_name)/$(arg image_topic)" />
     <remap from="camera_info" to="$(arg camera_name)/camera_info" />
 
     <param name="camera_frame" type="str" value="$(arg camera_frame)" />

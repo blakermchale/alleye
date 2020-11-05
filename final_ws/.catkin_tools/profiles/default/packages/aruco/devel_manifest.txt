@@ -1,0 +1,6 @@
+aruco_ros/aruco
+/home/bmchale/git/school/alleye/final_ws/devel/.private/aruco/cmake.lock /home/bmchale/git/school/alleye/final_ws/devel/./cmake.lock
+/home/bmchale/git/school/alleye/final_ws/devel/.private/aruco/lib/libaruco.so /home/bmchale/git/school/alleye/final_ws/devel/lib/libaruco.so
+/home/bmchale/git/school/alleye/final_ws/devel/.private/aruco/lib/pkgconfig/aruco.pc /home/bmchale/git/school/alleye/final_ws/devel/lib/pkgconfig/aruco.pc
+/home/bmchale/git/school/alleye/final_ws/devel/.private/aruco/share/aruco/cmake/arucoConfig-version.cmake /home/bmchale/git/school/alleye/final_ws/devel/share/aruco/cmake/arucoConfig-version.cmake
+/home/bmchale/git/school/alleye/final_ws/devel/.private/aruco/share/aruco/cmake/arucoConfig.cmake /home/bmchale/git/school/alleye/final_ws/devel/share/aruco/cmake/arucoConfig.cmake
