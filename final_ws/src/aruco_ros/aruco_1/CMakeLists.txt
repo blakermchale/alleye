@@ -10,7 +10,7 @@ set(CMAKE_CXX_EXTENSIONS ON) #...with compiler extensions like gnu++11
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES aruco
+  LIBRARIES aruco_1
 )
 include_directories(
   include/aruco/)
