@@ -1,0 +1,13 @@
+material AprilTag36h11/Tag
+{
+	technique
+	{
+		pass
+		{
+			texture_unit
+			{
+				texture tag_36h11.png
+			}
+		}
+	}
+}

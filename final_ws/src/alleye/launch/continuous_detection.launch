@@ -1,9 +1,9 @@
 <launch>
   <arg name="launch_prefix" default="" /> <!-- set to value="gdbserver localhost:10000" for remote debugging -->
   <arg name="node_namespace" default="apriltag_ros_continuous_node" />
-  <arg name="camera_name" default="/airsim_node/drone_1/bottom_center_custom/Scene" />
-  <arg name="camera_frame" default="camera" />
-  <arg name="image_topic" default="image_rect" />
+  <arg name="camera_name" default="/drone/down_camera" />
+  <arg name="camera_frame" default="camera_link" />
+  <arg name="image_topic" default="image_raw" />
 
   <!-- Set parameters -->
   <rosparam command="load" file="$(find alleye)/config/settings.yaml" ns="$(arg node_namespace)" />
