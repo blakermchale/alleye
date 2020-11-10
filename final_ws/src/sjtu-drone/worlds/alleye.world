@@ -95,8 +95,14 @@
     </model>
     <include>
         <uri>model://apriltag_36h11</uri>
-        <pose>0 0 0 0 0 0</pose>
+        <pose>0 0 0.001 0 0 0</pose>
+        <name>tag1_36h11</name>
     </include>
+    <!-- <include>
+        <uri>model://apriltag_36h11</uri>
+        <pose>0.5 0 0.001 0 0 0</pose>
+        <name>tag2_36h11</name>
+    </include> -->
     <include>
       <uri>model://sjtu_drone</uri>
       <pose>0 0 1 0 0 0</pose>

@@ -20,12 +20,11 @@ class Drone:
             rospy.logwarn_throttle(1.0, "Waiting for publishers to connect")
 
     def start(self):
-        # self.takeoff()
+        self.takeoff()
         # Move to point above area we want to monitor
-        self.set_local_position(0.0, 0.0, 5.0, 0.0)
+        self.set_local_position(0.0, 0.0, 1.0, 0.0)
 
     def takeoff(self):
-        rospy.loginfo("Taking off")
         self.pub_takeoff.publish()
         rospy.loginfo("Took off")
 
