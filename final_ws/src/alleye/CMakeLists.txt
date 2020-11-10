@@ -10,7 +10,6 @@ project(alleye)
 find_package(catkin REQUIRED
     COMPONENTS
     rospy 
-    airsim_ros_pkgs
 )
 
 ## System dependencies are found with CMake's conventions
