@@ -1,4 +1,4 @@
-material AprilTag36h11/Tag
+material Tag36_11_00002/Tag
 {
 	technique
 	{
@@ -6,7 +6,7 @@ material AprilTag36h11/Tag
 		{
 			texture_unit
 			{
-				texture tag_36h11.png
+				texture tag36_11_00002.png
 			}
 		}
 	}

@@ -50,7 +50,6 @@
   <!--   <doc_depend>doxygen</doc_depend> -->
 
   <depend>rospy</depend>
-  <depend>airsim_ros_pkgs</depend>
   <buildtool_depend>catkin</buildtool_depend>
 
 

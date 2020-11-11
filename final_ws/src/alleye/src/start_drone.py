@@ -22,7 +22,7 @@ class Drone:
     def start(self):
         self.takeoff()
         # Move to point above area we want to monitor
-        self.set_local_position(0.0, 0.0, 1.0, 0.0)
+        self.set_local_position(-9.0, 0.0, 7.0, 0.0)
 
     def takeoff(self):
         self.pub_takeoff.publish()

@@ -26,3 +26,13 @@ roslaunch sjtu_drone simple.launch
 source devel/setup.bash
 roslaunch alleye start_drone.launch
 ```
+
+## AprilTag "Generation"
+
+Images from [AprilTag 36h11](https://github.com/AprilRobotics/apriltag-imgs/tree/master/tag36h11)
+
+ImageMagick tool used to scale to correct size. ex:
+
+```bash
+convert tag36_11_00000.png -scale 5000% tag36_11_00000_big.png
+```
