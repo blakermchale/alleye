@@ -1,5 +1,8 @@
 # AllEye
-EECE5552 Assistive Robotics Final Project
+EECE5552 Assistive Robotics Final Project  
+Professor Ramezani
+
+![Alleye.png](/docs/Assistive.png)
 
 ## Installation
 
