@@ -2,7 +2,8 @@
 EECE5552 Assistive Robotics Final Project  
 Professor Ramezani
 
-![Alleye.png](/docs/Assistive.png)
+<img src="docs/alleye.jpg" height="400">
+
 
 ## Installation
 
