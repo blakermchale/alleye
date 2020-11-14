@@ -1,4 +1,4 @@
-# AllEye
+# Alleye
 EECE5552 Assistive Robotics Final Project  
 Professor Ramezani
 
