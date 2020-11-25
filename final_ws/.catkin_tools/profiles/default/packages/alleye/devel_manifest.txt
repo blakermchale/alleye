@@ -1,5 +1,0 @@
-alleye
-/home/bmchale/git/school/alleye/final_ws/devel/.private/alleye/cmake.lock /home/bmchale/git/school/alleye/final_ws/devel/./cmake.lock
-/home/bmchale/git/school/alleye/final_ws/devel/.private/alleye/lib/pkgconfig/alleye.pc /home/bmchale/git/school/alleye/final_ws/devel/lib/pkgconfig/alleye.pc
-/home/bmchale/git/school/alleye/final_ws/devel/.private/alleye/share/alleye/cmake/alleyeConfig.cmake /home/bmchale/git/school/alleye/final_ws/devel/share/alleye/cmake/alleyeConfig.cmake
-/home/bmchale/git/school/alleye/final_ws/devel/.private/alleye/share/alleye/cmake/alleyeConfig-version.cmake /home/bmchale/git/school/alleye/final_ws/devel/share/alleye/cmake/alleyeConfig-version.cmake

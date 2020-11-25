@@ -1,6 +1,0 @@
-sjtu-drone
-/home/bmchale/git/school/alleye/final_ws/devel/.private/sjtu_drone/cmake.lock /home/bmchale/git/school/alleye/final_ws/devel/./cmake.lock
-/home/bmchale/git/school/alleye/final_ws/devel/.private/sjtu_drone/lib/pkgconfig/sjtu_drone.pc /home/bmchale/git/school/alleye/final_ws/devel/lib/pkgconfig/sjtu_drone.pc
-/home/bmchale/git/school/alleye/final_ws/devel/.private/sjtu_drone/lib/sjtu_drone/drone_keyboard /home/bmchale/git/school/alleye/final_ws/devel/lib/sjtu_drone/drone_keyboard
-/home/bmchale/git/school/alleye/final_ws/devel/.private/sjtu_drone/share/sjtu_drone/cmake/sjtu_droneConfig-version.cmake /home/bmchale/git/school/alleye/final_ws/devel/share/sjtu_drone/cmake/sjtu_droneConfig-version.cmake
-/home/bmchale/git/school/alleye/final_ws/devel/.private/sjtu_drone/share/sjtu_drone/cmake/sjtu_droneConfig.cmake /home/bmchale/git/school/alleye/final_ws/devel/share/sjtu_drone/cmake/sjtu_droneConfig.cmake
