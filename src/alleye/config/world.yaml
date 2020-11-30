@@ -13,3 +13,7 @@ boundaries: {
 # Associate goal and start with tag ID
 goal: 3
 start: 0
+
+# Dimensions of grid
+width: 20
+height: 50

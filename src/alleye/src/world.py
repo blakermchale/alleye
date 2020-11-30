@@ -96,11 +96,11 @@ class PathPlanner:
             plt.yticks(visible=False)
             plt.imshow(viz_map, origin='upper', interpolation='none', clim=COLOR_MAP)
             ax.set_aspect('equal')
-            plt.pause(2)
+            # plt.pause(2)
             viz_map[init[0]][init[1]] = 5  # Place Start Node
             viz_map[goal[0]][goal[1]] = 6
             plt.imshow(viz_map, origin='upper', interpolation='none', clim=COLOR_MAP)
-            plt.pause(2)
+            # plt.pause(2)
 
         # Different move/search direction options:
 
@@ -149,7 +149,7 @@ class PathPlanner:
                 if self.visual:
                     plt.text(2, 10, s="No path found...", fontsize=18, style='oblique', ha='center', va='top')
                     plt.imshow(viz_map, origin='upper', interpolation='none', clim=COLOR_MAP)
-                    plt.pause(.5)
+                    plt.pause(.001)
                 return -1
             else:
                 open.sort()
@@ -182,7 +182,7 @@ class PathPlanner:
                                 if self.visual:
                                     viz_map[x2][y2] = 3
                                     plt.imshow(viz_map, origin='upper', interpolation='none', clim=COLOR_MAP)
-                                    plt.pause(.5)
+                                    plt.pause(.001)
 
         current_x = goal[0]
         current_y = goal[1]
@@ -205,25 +205,30 @@ class PathPlanner:
             for node in full_path:
                 viz_map[node[0]][node[1]] = 7
                 plt.imshow(viz_map, origin='upper', interpolation='none', clim=COLOR_MAP)
-                plt.pause(5)
+                # plt.pause(5)
 
             # Animate reaching goal:
             viz_map[goal[0]][goal[1]] = 8
             plt.imshow(viz_map, origin='upper', interpolation='none', clim=COLOR_MAP)
-            plt.pause(5)
+            # plt.pause(5)
 
         return init, full_path[:-1]
 
 
 class World():
-    def __init__(self, width=20):
+    def __init__(self):
         self.tfBuffer = tf2_ros.Buffer()
         self.listener = tf2_ros.TransformListener(self.tfBuffer)
         rospy.sleep(1.0)
         self.rospack = rospkg.RosPack()
+
+        path = self.rospack.get_path('alleye')
+        with open(path + '/config/world.yaml') as f:
+            world_dict = yaml.load(f, Loader=yaml.FullLoader)
         
-        self.width = width
-        self.grid = np.zeros((self.width,self.width))
+        self.width = world_dict['width']
+        self.height = world_dict['height']
+        self.grid = np.zeros((self.height, self.width))
         self.obstacles = []
         self.obs_bb = []
         self.max_bound = np.zeros((1,2))
@@ -232,24 +237,27 @@ class World():
         self.goal_id = 0
         self.start_id = 0
 
-        self.load_config()
+        self.load_config(world_dict)
         self.add_obstacles()
         
         self.planner = PathPlanner(self.grid, True)
 
         self.pub_plan = rospy.Publisher(f"/path", Path, queue_size=10)
         
-    def load_config(self):
-        path = self.rospack.get_path('alleye')
-        with open(path + '/config/world.yaml') as f:
-            world_dict = yaml.load(f, Loader=yaml.FullLoader)
-        
+    def load_config(self, world_dict):    
+        """
+        Load parameters from config yaml describing world. Also, grab initial transform of obstacles
+        in world.
+
+        Args:
+            world_dict (dict): dictionary of world parameters
+        """  
         self.start_id = world_dict["start"]
         self.goal_id = world_dict["goal"]
         self.new_origin = np.array(world_dict["boundaries"]["top_left"])
         self.max_bound = np.array([world_dict["boundaries"]["bot_right"]])
         self.max_bound = self.world_to_grid(self.max_bound)
-        self.box_size = self.max_bound[0][0]/self.width
+        self.box_size = self.max_bound[0]/np.array([self.width, self.height])
 
         # Listen for tag transforms
         for obs in world_dict['obstacles']:
@@ -263,6 +271,15 @@ class World():
                 continue
 
     def world_to_grid(self, points): 
+        """
+        Convert from world coordinate frame to grid coordinate frame.
+
+        Args:
+            points (np.ndarray): array of x, y coordinates
+
+        Returns:
+            points (np.ndarray): modified x, y coordinates
+        """
         points = np.asfarray(points)
         points -= self.new_origin
         points = np.flip(points, axis=1)
@@ -270,6 +287,15 @@ class World():
         return points
         
     def grid_to_world(self, points):
+        """
+        Convert from grid coordinate frame to world coordinate frame.
+
+        Args:
+            points (np.ndarray): array of x, y coordinates
+
+        Returns:
+            points (np.ndarray): modified x, y coordinates
+        """
         points = np.asfarray(points)
         points *= -1
         points = np.flip(points, axis=1)
@@ -277,31 +303,32 @@ class World():
         return points
 
     def add_obstacles(self):
+        """
+        Add obstacles to occupancy grid.
+        """
         obstacles = self.world_to_grid(self.obstacles)
-        rospy.loginfo(f"Max: {self.max_bound}")
-        rospy.loginfo(f"Before: {self.obstacles}\nAfter: {obstacles}")
+
         for i in range(len(obstacles)):
             bb_tl = obstacles[i] - self.obs_bb[i]
             bb_br = obstacles[i] + self.obs_bb[i]
 
             tl = np.floor(bb_tl/self.box_size).astype(int)
             br = np.floor(bb_br/self.box_size).astype(int) + 1
-            rospy.loginfo(f"{tl}, {br}")
 
-            i_min = tl[0]
-            j_min = tl[1]
-            i_max = br[0]
-            j_max = br[1]
+            i_min = tl[1]
+            j_min = tl[0]
+            i_max = br[1]
+            j_max = br[0]
 
             if i_min < 0:
                 i_min = 0
-            elif i_min > self.width:
-                i_min = self.width
+            elif i_min > self.height:
+                i_min = self.height
 
             if i_max < 0:
                 i_max = 0
-            elif i_max > self.width:
-                i_max = self.width
+            elif i_max > self.height:
+                i_max = self.height
 
             if j_min < 0:
                 j_min = 0
@@ -313,9 +340,14 @@ class World():
             elif j_max > self.width:
                 j_max = self.width
 
-            self.grid[j_min:j_max,i_min:i_max] = 1
+            self.grid[i_min:i_max,j_min:j_max] = 1
 
     def generate_path(self):
+        """
+        Performs A* Path Planning based on the grid world and the goal/start apriltags given in the config.
+
+        """
+        
         # Listen for tag transforms
         try:
             start_trans = self.tfBuffer.lookup_transform('world', f'tag_{self.start_id}', rospy.Time(0))
@@ -330,13 +362,9 @@ class World():
             np.array([[goal_trans.transform.translation.x, goal_trans.transform.translation.y]]))
 
         start_idx = np.floor(start[0]/self.box_size).astype(int)
-        start_idx = np.flip(start_idx)
         goal_idx = np.floor(goal[0]/self.box_size).astype(int)
-        goal_idx = np.flip(goal_idx)
 
-        rospy.loginfo(f"{start_idx}, {goal_idx}")
         path = self.planner.a_star(start_idx, goal_idx)
-        rospy.loginfo(path)
         
             
 

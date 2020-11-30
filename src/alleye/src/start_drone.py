@@ -94,14 +94,6 @@ def main():
     drone.start()
     rospy.spin()
 
-    #init world
-    # Input: Boundaries(-9.2, 6.0), (1.6, 6.0), (1.6, -4.5), (-9.2, -4.5), Obstacles [(x,y), ...], size input ex. (20,20), apriltag config to bounding box
-    # output: Binary world [[]]
-
-    # apriltag config to goal/start positions
-
-    # run a_star.py
-
 
 if __name__=="__main__":
     main()
