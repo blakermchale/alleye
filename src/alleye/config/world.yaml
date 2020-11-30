@@ -1,0 +1,15 @@
+# Associate boundaries to obstacle tag IDs
+obstacles : [
+  {id: 1, bounds: [1, 1]}, # car
+  {id: 2, bounds: [0.2, 0.2]} # person
+]
+
+# Boundaries that contain this world
+boundaries: {
+  top_left: [2.8, 7.2], 
+  bot_right: [-10.4, -5.7]
+}
+
+# Associate goal and start with tag ID
+goal: 3
+start: 0

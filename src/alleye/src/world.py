@@ -1,5 +1,15 @@
+#!/usr/bin/env python3
 
-#!/usr/bin/python
+import yaml
+import rospkg
+import rospy
+import tf2_ros
+from geometry_msgs.msg import TransformStamped, Vector3, PoseStamped
+from std_msgs.msg import Header
+from nav_msgs.msg import Path
+import matplotlib.pyplot as plt
+import numpy as np
+
 
 """
 BSD 2-Clause License
@@ -205,40 +215,135 @@ class PathPlanner:
         return init, full_path[:-1]
 
 
-if __name__ == '__main__':
+class World():
+    def __init__(self, width=20):
+        self.tfBuffer = tf2_ros.Buffer()
+        self.listener = tf2_ros.TransformListener(self.tfBuffer)
+        rospy.sleep(1.0)
+        self.rospack = rospkg.RosPack()
+        
+        self.width = width
+        self.grid = np.zeros((self.width,self.width))
+        self.obstacles = []
+        self.obs_bb = []
+        self.max_bound = np.zeros((1,2))
+        self.box_size = 0
 
-    #These are where the grids are constructed
+        self.goal_id = 0
+        self.start_id = 0
 
-    # test_grid = [[0, 0, 0, 0, 0, 0],
-    #              [0, 1, 1, 1, 1, 0],
-    #              [0, 1, 0, 0, 0, 0],
-    #              [0, 1, 0, 0, 0, 0],
-    #              [0, 1, 0, 0, 0, 0],
-    #              [0, 1, 0, 0, 0, 0],
-    #              [0, 1, 0, 0, 0, 0],
-    #              [0, 1, 0, 0, 1, 0]]
-    # test_start = [0, 0]  # [x, y]
-    # test_goal = [5, 7]   # [x, y]
+        self.load_config()
+        self.add_obstacles()
+        
+        self.planner = PathPlanner(self.grid, True)
 
-    test_grid = [[0, 0, 0, 0, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 0, 0, 0],
-             [1, 0, 1, 1, 1, 1, 1, 1],
-             [1, 0, 0, 1, 1, 0, 0, 1],
-             [1, 0, 0, 1, 1, 0, 0, 1],
-             [1, 0, 0, 1, 1, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 1],
-             [1, 0, 0, 0, 0, 0, 0, 1],
-             [1, 1, 1, 1, 1, 1, 1, 1]]
+        self.pub_plan = rospy.Publisher(f"/path", Path, queue_size=10)
+        
+    def load_config(self):
+        path = self.rospack.get_path('alleye')
+        with open(path + '/config/world.yaml') as f:
+            world_dict = yaml.load(f, Loader=yaml.FullLoader)
+        
+        self.start_id = world_dict["start"]
+        self.goal_id = world_dict["goal"]
+        self.new_origin = np.array(world_dict["boundaries"]["top_left"])
+        self.max_bound = np.array([world_dict["boundaries"]["bot_right"]])
+        self.max_bound = self.world_to_grid(self.max_bound)
+        self.box_size = self.max_bound[0][0]/self.width
 
-    test_start = [1, 1]  #  [x, y]
-    test_goal =  [6, 11]  # [x, y]
+        # Listen for tag transforms
+        for obs in world_dict['obstacles']:
+            try:
+                tag_id = obs['id']
+                trans = self.tfBuffer.lookup_transform('world', f'tag_{tag_id}', rospy.Time(0))
+                self.obstacles.append(np.array([trans.transform.translation.x, trans.transform.translation.y]))
+                self.obs_bb.append(np.array(obs['bounds']))
+            except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
+                rospy.logwarn(e)
+                continue
 
-    # Create an instance of the PathPlanner class:
-    test_planner = PathPlanner(test_grid, True)
+    def world_to_grid(self, points): 
+        points = np.asfarray(points)
+        points -= self.new_origin
+        points = np.flip(points, axis=1)
+        points *= -1
+        return points
+        
+    def grid_to_world(self, points):
+        points = np.asfarray(points)
+        points *= -1
+        points = np.flip(points, axis=1)
+        points += self.new_origin
+        return points
 
-    # Plan a path.
-    test_planner.a_star(test_start, test_goal)
+    def add_obstacles(self):
+        obstacles = self.world_to_grid(self.obstacles)
+        rospy.loginfo(f"Max: {self.max_bound}")
+        rospy.loginfo(f"Before: {self.obstacles}\nAfter: {obstacles}")
+        for i in range(len(obstacles)):
+            bb_tl = obstacles[i] - self.obs_bb[i]
+            bb_br = obstacles[i] + self.obs_bb[i]
+
+            tl = np.floor(bb_tl/self.box_size).astype(int)
+            br = np.floor(bb_br/self.box_size).astype(int) + 1
+            rospy.loginfo(f"{tl}, {br}")
+
+            i_min = tl[0]
+            j_min = tl[1]
+            i_max = br[0]
+            j_max = br[1]
+
+            if i_min < 0:
+                i_min = 0
+            elif i_min > self.width:
+                i_min = self.width
+
+            if i_max < 0:
+                i_max = 0
+            elif i_max > self.width:
+                i_max = self.width
+
+            if j_min < 0:
+                j_min = 0
+            elif j_min > self.width:
+                j_min = self.width
+            
+            if j_max < 0:
+                j_max = 0
+            elif j_max > self.width:
+                j_max = self.width
+
+            self.grid[j_min:j_max,i_min:i_max] = 1
+
+    def generate_path(self):
+        # Listen for tag transforms
+        try:
+            start_trans = self.tfBuffer.lookup_transform('world', f'tag_{self.start_id}', rospy.Time(0))
+            goal_trans = self.tfBuffer.lookup_transform('world', f'tag_{self.goal_id}', rospy.Time(0))
+        except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
+            rospy.logwarn(e)
+            return
+
+        start = self.world_to_grid(
+            np.array([[start_trans.transform.translation.x, start_trans.transform.translation.y]]))
+        goal = self.world_to_grid(
+            np.array([[goal_trans.transform.translation.x, goal_trans.transform.translation.y]]))
+
+        start_idx = np.floor(start[0]/self.box_size).astype(int)
+        start_idx = np.flip(start_idx)
+        goal_idx = np.floor(goal[0]/self.box_size).astype(int)
+        goal_idx = np.flip(goal_idx)
+
+        rospy.loginfo(f"{start_idx}, {goal_idx}")
+        path = self.planner.a_star(start_idx, goal_idx)
+        rospy.loginfo(path)
+        
+            
+
+if __name__ == "__main__":
+    rospy.init_node("world_node")
+
+    world = World()
+    print(world.grid)
+    world.generate_path()
+    # rospy.spin()
