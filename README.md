@@ -40,3 +40,8 @@ ImageMagick tool used to scale to correct size. ex:
 ```bash
 convert tag36_11_00000.png -scale 5000% tag36_11_00000_big.png
 ```
+
+## Sources
+
+[A_star python implementation](https://github.com/atomoclast/realitybytes_blogposts.git)
+[SJTU-drone package](https://github.com/tahsinkose/sjtu-drone)

@@ -1,7 +1,7 @@
 # Associate boundaries to obstacle tag IDs
 obstacles : [
-  {id: 1, bounds: [1, 1]}, # car
-  {id: 2, bounds: [0.2, 0.2]} # person
+  {id: 1, bounds: [2, 1]}, # car
+  {id: 2, bounds: [1.0, 1.0]} # person
 ]
 
 # Boundaries that contain this world
@@ -15,5 +15,5 @@ goal: 3
 start: 0
 
 # Dimensions of grid
-width: 20
-height: 50
+width: 80
+height: 200

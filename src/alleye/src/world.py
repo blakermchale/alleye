@@ -71,9 +71,9 @@ class PathPlanner:
                 col_diff = abs(j - self.goal_node[1])
                 self.heuristic[i][j] = int(abs(row_diff - col_diff) + min(row_diff, col_diff) * 2)
 
-        print("Heuristic:")
-        for i in range(len(self.heuristic)):
-            print(self.heuristic[i])
+        # print("Heuristic:")
+        # for i in range(len(self.heuristic)):
+        #     print(self.heuristic[i])
 
     def a_star(self, start_cart, goal_cart):
         """
@@ -85,7 +85,7 @@ class PathPlanner:
         # Calculate the Heuristic for the map
         self.calc_heuristic()
 
-        print(init, goal)
+        # print(init, goal)
 
         if self.visual:
             viz_map = deepcopy(self.grid)
@@ -196,10 +196,10 @@ class PathPlanner:
             current_x = previous_x
             current_y = previous_y
         full_path.reverse()
-        print("Found the goal in {} iterations.".format(count))
-        print("full_path: ", full_path[:-1])
-        for i in range(len(shortest_path)):
-            print(shortest_path[i])
+        # print("Found the goal in {} iterations.".format(count))
+        # print("full_path: ", full_path[:-1])
+        # for i in range(len(shortest_path)):
+        #     print(shortest_path[i])
 
         if self.visual:
             for node in full_path:
@@ -219,7 +219,7 @@ class World():
     def __init__(self):
         self.tfBuffer = tf2_ros.Buffer()
         self.listener = tf2_ros.TransformListener(self.tfBuffer)
-        rospy.sleep(1.0)
+        rospy.sleep(10.0)
         self.rospack = rospkg.RosPack()
 
         path = self.rospack.get_path('alleye')
@@ -237,11 +237,11 @@ class World():
         self.goal_id = 0
         self.start_id = 0
 
-        self.load_config(world_dict)
-        self.add_obstacles()
-        
-        self.planner = PathPlanner(self.grid, True)
+        self.world_dict = world_dict
+        self.planner = None
 
+        self.load_config(world_dict)
+        
         self.pub_plan = rospy.Publisher(f"/path", Path, queue_size=10)
         
     def load_config(self, world_dict):    
@@ -259,6 +259,10 @@ class World():
         self.max_bound = self.world_to_grid(self.max_bound)
         self.box_size = self.max_bound[0]/np.array([self.width, self.height])
 
+    def load_obstacles(self, world_dict):
+        self.grid = np.zeros((self.height, self.width))
+        self.obstacles = []
+        self.obs_bb = []
         # Listen for tag transforms
         for obs in world_dict['obstacles']:
             try:
@@ -269,6 +273,9 @@ class World():
             except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
                 rospy.logwarn(e)
                 continue
+
+        self.add_obstacles()
+        self.planner = PathPlanner(self.grid, False)
 
     def world_to_grid(self, points): 
         """
@@ -281,6 +288,7 @@ class World():
             points (np.ndarray): modified x, y coordinates
         """
         points = np.asfarray(points)
+        points = np.copy(points)
         points -= self.new_origin
         points = np.flip(points, axis=1)
         points *= -1
@@ -297,6 +305,7 @@ class World():
             points (np.ndarray): modified x, y coordinates
         """
         points = np.asfarray(points)
+        points = np.copy(points)
         points *= -1
         points = np.flip(points, axis=1)
         points += self.new_origin
@@ -346,8 +355,10 @@ class World():
         """
         Performs A* Path Planning based on the grid world and the goal/start apriltags given in the config.
 
+        Returns:
+            path (np.ndarray): x, y positions of path
         """
-        
+        self.load_obstacles(self.world_dict)
         # Listen for tag transforms
         try:
             start_trans = self.tfBuffer.lookup_transform('world', f'tag_{self.start_id}', rospy.Time(0))
@@ -365,13 +376,46 @@ class World():
         goal_idx = np.floor(goal[0]/self.box_size).astype(int)
 
         path = self.planner.a_star(start_idx, goal_idx)
+        path = np.flip(np.asfarray(path[1]), axis=1) * self.box_size
+        return self.grid_to_world(path)
+
+    def publish_path(self, path):
+        """
+        Publish the path for the client to follow in order to avoid obstacles.position
+
+        Args:
+            path (np.array): Contains poses to follow
+        """
+        path_msg = Path()
+        header = Header()
+
+        header.stamp = rospy.Time.now()
+        header.frame_id = "world"
+
+        path_msg.header = header
         
+        for p in path:
+            pose_stamped = PoseStamped()
+            pose_stamped.header = header
+            pose_stamped.pose.position.x = p[0]
+            pose_stamped.pose.position.y = p[1]
+            path_msg.poses.append(pose_stamped)
+
+        self.pub_plan.publish(path_msg)
+
+    def run(self):
+        """
+        Runs main loop for generating paths for navigation.
+        """
+        path = self.generate_path()
+        self.publish_path(path)          
             
 
 if __name__ == "__main__":
     rospy.init_node("world_node")
 
     world = World()
-    print(world.grid)
-    world.generate_path()
-    # rospy.spin()
+    rate = rospy.Rate(1)
+    while not rospy.is_shutdown():
+        world.run()
+        rate.sleep()
