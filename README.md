@@ -2,6 +2,8 @@
 EECE5552 Assistive Robotics Final Project  
 Professor Ramezani
 
+[![HitCount](http://hits.dwyl.com/ blakermchale/alleye.svg)](http://hits.dwyl.com/ blakermchale/alleye)
+
 <img src="docs/alleye.jpg" height="400">
 
 
